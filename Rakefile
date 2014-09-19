@@ -16,7 +16,7 @@ deploy_branch  = "gh-pages"
 ## -- Misc Configs -- ##
 
 public_dir      = "public"    # compiled site directory
-source_dir      = "source"    # source file directory
+source_dir      = "source/"    # source file directory
 blog_index_dir  = 'source'    # directory for your blog's index page (if you put your index in source/blog/index.html, set this to 'source/blog')
 deploy_dir      = "_deploy"   # deploy directory (for Github pages deployment)
 stash_dir       = "_stash"    # directory to stash posts for speedy generation
@@ -55,12 +55,17 @@ task :generate do
   system "jekyll"
 end
 
+desc "Publish to Bandlem"
+task :publish do
+  system "rsync -cav public/* www.bandlem.com:~/www/alblue.bandlem.com/"
+end
+
 desc "Watch the site and regenerate when it changes"
 task :watch do
   raise "### You haven't set anything up yet. First run `rake install` to set up an Octopress theme." unless File.directory?(source_dir)
   puts "Starting to watch source with Jekyll and Compass."
   system "compass compile --css-dir #{source_dir}/stylesheets" unless File.exist?("#{source_dir}/stylesheets/screen.css")
-  jekyllPid = Process.spawn({"OCTOPRESS_ENV"=>"preview"}, "jekyll --auto")
+  jekyllPid = Process.spawn({"OCTOPRESS_ENV"=>"preview"}, "jekyll --watch --auto")
   compassPid = Process.spawn("compass watch")
 
   trap("INT") {
